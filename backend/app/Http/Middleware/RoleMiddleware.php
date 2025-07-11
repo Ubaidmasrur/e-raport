@@ -1,5 +1,3 @@
-<?php
-
 namespace App\Http\Middleware;
 
 use Closure;
@@ -12,7 +10,7 @@ class RoleMiddleware
     {
         if (!$request->user() || $request->user()->role !== $role) {
             return response()->json([
-                'message' => 'Akses ditolak. Hanya untuk role: ' . $role
+                'message' => 'Akses ditolak. Role dibutuhkan: ' . $role
             ], Response::HTTP_FORBIDDEN);
         }
 
