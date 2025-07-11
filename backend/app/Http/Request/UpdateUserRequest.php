@@ -2,7 +2,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateUserRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -12,9 +12,10 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'  => 'sometimes|string|max:100',
-            'email' => 'sometimes|email|unique:users,email,' . $this->user,
-            'role'  => 'sometimes|in:admin,guru,wali'
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'role'     => 'required|in:admin,guru,wali',
         ];
     }
 }
