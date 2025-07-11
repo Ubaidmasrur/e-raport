@@ -1,17 +1,19 @@
 @component('mail::message')
 # Laporan Rekap Nilai Siswa
 
-Berikut adalah laporan nilai untuk:
+Berikut ini adalah laporan hasil evaluasi pembelajaran untuk:
 
-- **Nama:** {{ $siswa->nama }}  
-- **Kelas:** {{ $siswa->kelas }}  
-- **Semester:** {{ $semester }}  
+- **Nama:** {{ $siswa->nama }}
+- **Kelas:** {{ $siswa->kelas }}
+- **Semester:** {{ $semester }}
 - **Tahun Ajaran:** {{ $tahun }}
 
+Silakan buka file lampiran PDF untuk melihat detail nilai dan indikator perkembangan.
+
 @component('mail::button', ['url' => ''])
-Terima kasih telah mempercayakan pendidikan anak Anda.
+Terima kasih atas perhatian dan dukungannya.
 @endcomponent
 
 Salam hormat,  
-Sistem E-Raport SMA Muhammadiyah 10 Surabaya
+**Sistem E-Raport SMA Muhammadiyah 10 Surabaya**
 @endcomponent
