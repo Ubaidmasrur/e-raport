@@ -1,56 +1,40 @@
-namespace App\Http\Controllers;
-
-use App\Models\Siswa;
-use App\Models\Nilai;
-use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\TahunAjaran;
-
-class PDFController extends Controller
+public function cetakRekap($id, Request $r)
 {
-    public function cetakRekap($id, Request $request)
-    {
-        $semester = $request->semester ?? 'Ganjil';
-        $tahun = $request->tahun ?? TahunAjaran::where('is_active', true)->first()?->tahun;
-
-        $siswa = Siswa::with('user')->findOrFa
-
-use App\Mail\LaporanNilaiMail;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-
-public function kirimEmailRekap($id, Request $request)
-{
-    $semester = $request->semester ?? 'Ganjil';
-    $tahun = $request->tahun ?? TahunAjaran::where('is_active', true)->first()?->tahun;
-
     $siswa = Siswa::with('user')->findOrFail($id);
-    $nilai = Nilai::with('indikator')
-        ->where('siswa_id', $id)
-        ->where('semester', $semester)
-        ->where('tahun_ajaran', $tahun)
-        ->get();
+    $nilai = Nilai::with('indikator')->where([
+        ['siswa_id', $id],
+        ['semester', $r->semester ?? 'Ganjil'],
+        ['tahun_ajaran', $r->tahun ?? TahunAjaran::where('is_active', true)->first()?->tahun]
+    ])->get();
 
-    // Generate PDF dan simpan sementara
-    $pdf = Pdf::loadView('pdf.rekap', compact('siswa', 'nilai', 'semester', 'tahun'));
-    $filename = "Rekap-Nilai-{$siswa->nama}-{$semester}-{$tahun}.pdf";
-    $pdfPath = storage_path("app/public/{$filename}");
-    Storage::put("public/{$filename}", $pdf->output());
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.rekap', compact('siswa', 'nilai', 'r'));
+    \App\Models\PrintLog::create([
+        'user_id' => auth()->id(), 'siswa_id' => $siswa->id,
+        'tipe' => 'pdf', 'semester' => $r->semester, 'tahun_ajaran' => $r->tahun
+    ]);
 
-    // Kirim ke email wali murid
-    $wali = $siswa->user;
-    Mail::to($wali->email)->send(new LaporanNilaiMail($siswa, $semester, $tahun, $pdfPath));
-
-    return response()->json(['message' => 'Laporan berhasil dikirim ke wali murid.']);
+    return $pdf->download("Rekap-{$siswa->nama}.pdf");
 }
 
-use App\Models\PrintLog;
+public function kirimEmailRekap($id, Request $r)
+{
+    $siswa = Siswa::with('user')->findOrFail($id);
+    $nilai = Nilai::with('indikator')->where([
+        ['siswa_id', $id],
+        ['semester', $r->semester],
+        ['tahun_ajaran', $r->tahun]
+    ])->get();
 
-PrintLog::create([
-    'user_id' => auth()->id(),
-    'siswa_id' => $siswa->id,
-    'tipe' => 'pdf',
-    'semester' => $semester,
-    'tahun_ajaran' => $tahun,
-    'waktu' => now()
-]);
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.rekap', compact('siswa', 'nilai', 'r'));
+    $path = storage_path("app/public/Rekap-{$siswa->nama}.pdf");
+    \Illuminate\Support\Facades\Storage::put("public/Rekap-{$siswa->nama}.pdf", $pdf->output());
+
+    Mail::to($siswa->user->email)->send(new \App\Mail\LaporanNilaiMail($siswa, $r->semester, $r->tahun, $path));
+
+    \App\Models\PrintLog::create([
+        'user_id' => auth()->id(), 'siswa_id' => $siswa->id,
+        'tipe' => 'email', 'semester' => $r->semester, 'tahun_ajaran' => $r->tahun
+    ]);
+
+    return response()->json(['message' => 'Email laporan berhasil dikirim']);
+}
