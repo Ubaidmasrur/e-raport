@@ -1,45 +1,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index()  { return User::all(); }
+
+    public function store(StoreUserRequest $request)
     {
-        return User::all();
+        return User::create($request->validated());
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name'     => 'required',
-            'email'    => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role'     => 'required|in:admin,guru,wali'
-        ]);
+    public function show($id) { return User::findOrFail($id); }
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role
-        ]);
-
-        return response()->json($user, 201);
-    }
-
-    public function show($id)
-    {
-        return User::findOrFail($id);
-    }
-
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
-        $user->update($request->only('name', 'email', 'role'));
-        return response()->json($user);
+        $user->update($request->validated());
+        return $user;
     }
 
     public function destroy($id)
