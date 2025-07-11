@@ -1,24 +1,30 @@
-namespace App\Http\Controllers;
-
-use App\Models\Siswa;
-use App\Models\Nilai;
-use Illuminate\Http\Request;
-
-class RekapController extends Controller
+public function rekapPerSiswa($id, Request $r)
 {
-    /**
-     * Ambil rekap nilai lengkap 1 siswa
-     */
-    public function rekapPerSiswa($id, Request $request)
-    {
-        $semester = $request->semester ?? 'Ganjil';
-        $tahun = $request->tahun ?? now()->year . '/' . (now()->year + 1);
+    $nilai = Nilai::with('indikator')->where([
+        ['siswa_id', $id],
+        ['semester', $r->semester ?? 'Ganjil'],
+        ['tahun_ajaran', $r->tahun ?? now()->year . '/' . (now()->year + 1)]
+    ])->get();
 
-        $nilai = Nilai::with('indikator')
-            ->where('siswa_id', $id)
-            ->where('semester', $semester)
-            ->where('tahun_ajaran', $tahun)
-            ->get();
+    return response()->json([
+        'siswa' => Siswa::with('user')->findOrFail($id),
+        'nilai' => $nilai,
+    ]);
+}
 
-        return response()->json([
-            'siswa' => Siswa::with('user')->findOrFail($id
+public function grafikSiswa($id, Request $r)
+{
+    $nilai = Nilai::with('indikator')->where([
+        ['siswa_id', $id],
+        ['semester', $r->semester ?? 'Ganjil'],
+        ['tahun_ajaran', $r->tahun ?? now()->year . '/' . (now()->year + 1)]
+    ])->get();
+
+    return $nilai->map(function ($n) {
+        return [
+            'indikator' => $n->indikator->nama,
+            'domain'    => $n->indikator->domain,
+            'nilai'     => $n->nilai
+        ];
+    });
+}
