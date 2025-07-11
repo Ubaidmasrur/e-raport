@@ -1,7 +1,9 @@
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
 class Siswa extends Model
 {
-    use HasFactory;
-
     protected $fillable = ['nama', 'kelas', 'user_id'];
 
     public function user()
@@ -12,5 +14,10 @@ class Siswa extends Model
     public function nilais()
     {
         return $this->hasMany(Nilai::class);
+    }
+
+    public function printLogs()
+    {
+        return $this->hasMany(PrintLog::class);
     }
 }
