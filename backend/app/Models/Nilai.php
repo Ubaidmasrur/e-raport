@@ -1,8 +1,17 @@
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
 class Nilai extends Model
 {
-    use HasFactory;
-
-    protected $fillable = ['siswa_id', 'indikator_id', 'semester', 'tahun_ajaran', 'nilai', 'komentar'];
+    protected $fillable = [
+        'siswa_id',
+        'indikator_id',
+        'semester',
+        'tahun_ajaran',
+        'nilai',
+        'komentar'
+    ];
 
     public function siswa()
     {
