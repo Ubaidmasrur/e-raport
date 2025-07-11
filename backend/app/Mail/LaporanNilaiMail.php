@@ -13,6 +13,9 @@ class LaporanNilaiMail extends Mailable
     public $tahun;
     public $pdfPath;
 
+    /**
+     * Buat instance mail laporan.
+     */
     public function __construct($siswa, $semester, $tahun, $pdfPath)
     {
         $this->siswa = $siswa;
@@ -21,9 +24,12 @@ class LaporanNilaiMail extends Mailable
         $this->pdfPath = $pdfPath;
     }
 
+    /**
+     * Bangun email dengan lampiran PDF.
+     */
     public function build()
     {
-        return $this->subject('Laporan Rekap Nilai')
+        return $this->subject('Laporan Rekap Nilai Siswa')
             ->markdown('emails.laporan')
             ->attach($this->pdfPath, [
                 'as' => "Rekap-Nilai-{$this->siswa->nama}-{$this->semester}-{$this->tahun}.pdf",
