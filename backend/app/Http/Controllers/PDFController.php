@@ -43,3 +43,14 @@ public function kirimEmailRekap($id, Request $request)
 
     return response()->json(['message' => 'Laporan berhasil dikirim ke wali murid.']);
 }
+
+use App\Models\PrintLog;
+
+PrintLog::create([
+    'user_id' => auth()->id(),
+    'siswa_id' => $siswa->id,
+    'tipe' => 'pdf',
+    'semester' => $semester,
+    'tahun_ajaran' => $tahun,
+    'waktu' => now()
+]);
